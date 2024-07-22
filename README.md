@@ -6,6 +6,6 @@ A szkript a legtöbb modern böngészőre telepíthető.<br>
     * [Mozilla Firefox](https://addons.mozilla.org/en-US/firefox/addon/violentmonkey/)
     * [Google Chrome](https://chromewebstore.google.com/detail/jinjaccalgkegednnccohejagnlnfdag?hl=hu&utm_source=ext_sidebar)
     * [Új Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao)
-1. Most már telepítheted a szkriptet. Ehhez [kattints ide](https://github.com/MentalGravis/CMMSReportCopy/releases/latest/download/CMMSLayoutChange.user.js).
+1. Most már telepítheted a szkriptet. Ehhez [kattints ide](https://github.com/MentalGravis/CMMSLayoutChange/releases/latest/download/CMMSLayoutChange.user.js).
 1. A megjelenő oldalon kattints az **Install** gombra.
 1. Lépj be a CMMSbe, és használd egészséggel.

@@ -161,7 +161,7 @@
             function numRows(domElement) {
                 let numberofrows = 0;
                 if (domElement.textContent) {
-                    let lines = domElement.textContent.split("\n");
+                    let lines = domElement.textContent.trim().split("\n");
                     lines.forEach((line) => {
                         numberofrows += Math.ceil(line.length / 130) || 1;
                     });

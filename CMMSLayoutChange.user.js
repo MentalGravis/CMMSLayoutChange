@@ -85,11 +85,25 @@
                     .catch(error => console.error('Error downloading image:', error));
             }
 
+            // Function to check if "Mellékletek" is active
+            let isMellekletekActive = function() {
+                let spans = document.querySelectorAll('span');
+                for (let span of spans) {
+                    if (span.textContent.trim() === "Mellékletek") {
+                        let parentParent = span.closest('.dxtc-activeTab');
+                        if (parentParent && parentParent.style.display != "none") {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
             // Create a floating button
             let floatingButton = document.createElement('button');
             floatingButton.textContent = "Összes fotó letöltése";
             floatingButton.style.position = 'fixed';
-            floatingButton.style.top = '10px';
+            floatingButton.style.bottom = '10px';
             floatingButton.style.left = '10px';
             floatingButton.style.zIndex = '9999';
             floatingButton.style.backgroundColor = '#007BFF';
@@ -120,9 +134,9 @@
             // Append the button to the body
             document.body.appendChild(floatingButton);
 
-            // Check URL every 2 seconds to display or hide the button
+            // Check URL and "Mellékletek" state every 2 seconds to display or hide the button
             setInterval(function() {
-                if (/WorkOrder_DetailView/.test(window.location.href)) {
+                if (/WorkOrder_DetailView/.test(window.location.href) && isMellekletekActive()) {
                     floatingButton.style.display = 'block';
                 } else {
                     floatingButton.style.display = 'none';

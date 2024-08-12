@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cmms.extra.bnref.hu/*
 // @grant       none
-// @version     3.0
+// @version     3.1
 // @description 2024. 05. 10. 7:57:20
 // @require     https://code.jquery.com/jquery-3.6.4.min.js#sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=
 // ==/UserScript==
@@ -16,8 +16,9 @@
         var urlRegex = /^https:\/\/cmms\.extra\.bnref\.hu\/(?:default\.aspx)?(?:#ShortcutViewID.*)?$/i;
 
         if (urlRegex.test(window.location.href)) {
-            // Track the last known URL
+            // Track the last known URL and window width
             let lastUrl = window.location.href;
+            let lastWidth = window.innerWidth;
 
             // Function to move the size bar to the left
             let moveSizeLeft = function() {
@@ -106,7 +107,7 @@
             let floatingButton = document.createElement('button');
             floatingButton.textContent = "Összes fotó letöltése";
             floatingButton.style.position = 'fixed';
-            floatingButton.style.bottom = '10px';
+            floatingButton.style.bottom = '30px';
             floatingButton.style.left = '10px';
             floatingButton.style.zIndex = '9999';
             floatingButton.style.backgroundColor = '#007BFF';
@@ -175,10 +176,17 @@
             setInterval(dinamicTextWindows, 2000);
 
             // Function to handle the floating scrollbar
-            function fixWideElement(selector) {
+            function fixWideElement(selector, maintainScrollPosition = false) {
                 const wideElement = document.querySelector(selector);
 
                 if (wideElement) {
+                    let currentScrollPercentage = 0;
+
+                    if (maintainScrollPosition) {
+                        // Calculate the current scroll position as a percentage
+                        currentScrollPercentage = wideElement.scrollLeft / (wideElement.scrollWidth - wideElement.clientWidth);
+                    }
+
                     // Create a wrapper div for the wide element
                     const wrapper = document.createElement('div');
                     wrapper.style.overflowX = 'hidden';  // Hide the scrollbar in this wrapper
@@ -225,6 +233,12 @@
                     // Ensure the wide element is scrollable
                     wideElement.style.overflowX = 'scroll';
 
+                    // Restore scroll position based on percentage after resizing
+                    if (maintainScrollPosition) {
+                        wideElement.scrollLeft = currentScrollPercentage * (wideElement.scrollWidth - wideElement.clientWidth);
+                        scrollbarContainer.scrollLeft = wideElement.scrollLeft;
+                    }
+
                     // Optional: If the body has overflow issues, you can also fix that
                     document.body.style.overflowX = 'hidden';
 
@@ -234,16 +248,23 @@
                 }
             }
 
-            // Function to check if URL has changed
-            function checkUrlChange() {
-                if (window.location.href !== lastUrl) {
-                    lastUrl = window.location.href;
-                    fixWideElement("#Vertical_ContentColorPanel");
+            // Function to check if URL or window size has changed
+            function checkUrlOrResize() {
+                const currentUrl = window.location.href;
+                const currentWidth = window.innerWidth;
+
+                if (currentUrl !== lastUrl || currentWidth !== lastWidth) {
+                    lastUrl = currentUrl;
+                    lastWidth = currentWidth;
+                    fixWideElement("#Vertical_ContentColorPanel", true);  // Maintain scroll position on resize
                 }
             }
 
-            // Set an interval to check for URL changes
-            setInterval(checkUrlChange, 1000); // Check every 1 second
+            // Set an interval to check for URL changes or window resizing
+            setInterval(checkUrlOrResize, 1000); // Check every 1 second
+
+            // Listen for window resize event
+            window.addEventListener('resize', checkUrlOrResize);
 
             // Initial call to fixWideElement on page load
             fixWideElement("#Vertical_ContentColorPanel");

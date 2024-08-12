@@ -33,3 +33,7 @@ A szkript a legtöbb modern böngészőre telepíthető.<br>
 <picture>
 <img alt="Képletöltés gomb" src="img/KépLetöltésGomb.png">
 </picture><br>
+
+* Bugfix az oldalra görgetésnél elcsúszó elemekre
+    * Egy wrapperba csomagolom a teljes oldalt, és a scrollbart kiteszem az eddigi helyére, ezáltal a túlcsordulás megszűnik jobbgomb, vagy oszlopok mozgatásakor
+    * Később ezt továbbfejlesztve szeretném megcsinálni, hogy csak az egyes túlcsorduló elemek legyenek a wrapperban, minden más pedig látszódjon.

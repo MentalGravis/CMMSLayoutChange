@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cmms.extra.bnref.hu/*
 // @grant       none
-// @version     3.1
+// @version     2.4
 // @description 2024. 05. 10. 7:57:20
 // @require     https://code.jquery.com/jquery-3.6.4.min.js#sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=
 // ==/UserScript==
@@ -29,67 +29,13 @@
             };
             setInterval(moveSizeLeft, 2000);
 
-            // Function to find and log the value within the nested children of the sibling of the <td> with content "Igénylési szám:"
-            let findIgénylésiSzámValue = function() {
-                let tds = document.querySelectorAll('td');
-                for (let td of tds) {
-                    if (td.textContent.trim() === "Igénylési szám:") {
-                        try {
-                            let value = td.parentElement.children[1].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].value;
-                            return value; // Return the value if found
-                        } catch (error) {
-                            console.error('Error accessing nested value:', error);
-                        }
-                    }
-                }
-                return null; // Return null if not found
+
+            // Retrieve the "Igénylési szám" value from an input
+            const findIgénylésiSzámValue = () => {
+                const input = document.querySelector('input[name*=RequestNumber]');
+                return input ? input.value : null;
             };
 
-            let findMellekletekParents = function() {
-                let igénylésiSzámValue = findIgénylésiSzámValue();
-                if (!igénylésiSzámValue) {
-                    console.error('Igénylési szám value not found.');
-                    return;
-                }
-
-                let spans = document.querySelectorAll('span');
-                spans.forEach((span) => {
-                    if (span.textContent.trim() === "Mellékletek") {
-                        let parentParent = span.closest('.dxtc-activeTab');
-                        if (parentParent) {
-                            if (parentParent.style.display != "none"){
-                                console.log("Mellékletek aktív");
-
-                                let pictureRows = document.querySelector(".dxtc-content > div:nth-child(4) > div > div > div > div > div:nth-child(2) > div > table > tbody > tr > td > table > tbody").children;
-                                for (let i=1; i<pictureRows.length; i++){
-                                    let picture = pictureRows[i].children[2].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].src;
-                                    console.log(picture);
-                                    downloadImageAsJpg(picture, `${igénylésiSzámValue}_${i}`);
-                                }
-                            }else{
-                                console.log("Mellékletek passzív");
-                            }
-                        }
-                    }
-                });
-            };
-
-            // Function to download an image as JPG with a specific name
-            function downloadImageAsJpg(url, name) {
-                fetch(url)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        let a = document.createElement('a');
-                        let objectURL = window.URL.createObjectURL(blob);
-                        a.href = objectURL;
-                        a.download = `${name}.jpg`;
-                        a.click();
-                        window.URL.revokeObjectURL(objectURL);
-                    })
-                    .catch(error => console.error('Error downloading image:', error));
-            }
-
-            // Function to check if "Mellékletek" is active
             let isMellekletekActive = function() {
                 let spans = document.querySelectorAll('span');
                 for (let span of spans) {
@@ -103,20 +49,78 @@
                 return false;
             };
 
+            // Download an image as JPG with a specific name
+            const downloadImageAsJpg = (url, name) => {
+                fetch(url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const a = document.createElement('a');
+                        const objectURL = URL.createObjectURL(blob);
+                        a.href = objectURL;
+                        a.download = `${name}.jpg`;
+                        a.click();
+                        URL.revokeObjectURL(objectURL);
+                    })
+                    .catch(error => console.error('Error downloading image:', error));
+            };
+
+            // Main function to handle downloading images if conditions are met
+            const downloadImagesIfActive = () => {
+                const igénylésiSzámValue = findIgénylésiSzámValue();
+
+                if (!igénylésiSzámValue) {
+                    console.error('Igénylési szám value not found.');
+                    return;
+                }
+
+                if (!isMellekletekActive()) {
+                    console.log("Mellékletek is not active.");
+                    return;
+                }
+
+                console.log("Mellékletek is active.");
+
+                // Select images with id containing "Photo_View"
+                const pictureRows = document.querySelectorAll('img[id*="Photo_View"]');
+                if (pictureRows.length <= 1) { // Check if there are enough images to skip the first one
+                    console.warn("No images found or only one image found with 'Photo_View' in their ID.");
+                    return;
+                }
+
+                // Start from the second picture
+                Array.from(pictureRows).slice(1).forEach((img, index) => {
+                    const pictureSrc = img.src;
+                    console.log(`Downloading image ${index + 1}: ${pictureSrc}`); // index + 2 to reflect actual image position
+
+                    // Attempt to download the image, log an error if it fails
+                    try {
+                        downloadImageAsJpg(pictureSrc, `${igénylésiSzámValue}_${index + 1}`);
+                    } catch (error) {
+                        console.error(`Failed to download image ${index + 1}:`, error);
+                    }
+                });
+            };
+
+            // Run the main download function
+            // downloadImagesIfActive();
+
             // Create a floating button
-            let floatingButton = document.createElement('button');
-            floatingButton.textContent = "Összes fotó letöltése";
-            floatingButton.style.position = 'fixed';
-            floatingButton.style.bottom = '30px';
-            floatingButton.style.left = '10px';
-            floatingButton.style.zIndex = '9999';
-            floatingButton.style.backgroundColor = '#007BFF';
-            floatingButton.style.color = 'white';
-            floatingButton.style.border = 'none';
-            floatingButton.style.padding = '10px 20px';
-            floatingButton.style.borderRadius = '5px';
-            floatingButton.style.cursor = 'pointer';
-            floatingButton.style.display = 'none'; // Initially hidden
+            let floatingButton = Object.assign(document.createElement('button'), {
+                textContent: "Összes fotó letöltése",
+                style: `
+                    position: fixed;
+                    bottom: 30px;
+                    left: 10px;
+                    z-index: 9999;
+                    background-color: #007BFF;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    display: none; /* Initially hidden */
+                `
+            });
 
             // Add hover and click effects
             floatingButton.addEventListener('mouseover', function() {
@@ -133,7 +137,7 @@
             });
 
             // Add click event to the button to trigger findMellekletekParents function
-            floatingButton.addEventListener('click', findMellekletekParents);
+            floatingButton.addEventListener('click', downloadImagesIfActive);
 
             // Append the button to the body
             document.body.appendChild(floatingButton);
@@ -189,10 +193,12 @@
 
                     // Create a wrapper div for the wide element
                     const wrapper = document.createElement('div');
-                    wrapper.style.overflowX = 'hidden';  // Hide the scrollbar in this wrapper
-                    wrapper.style.width = '100%';
-                    wrapper.style.position = 'relative';
-                    wrapper.style.boxSizing = 'border-box';
+                    Object.assign(wrapper.style, {
+                        overflowX: 'hidden',  // Hide the scrollbar in this wrapper
+                        width: '100%',
+                        position: 'relative',
+                        boxSizing: 'border-box'
+                    });
 
                     // Move the wide element into the wrapper
                     wideElement.parentNode.insertBefore(wrapper, wideElement);
@@ -200,14 +206,16 @@
 
                     // Create a floating scrollbar container
                     const scrollbarContainer = document.createElement('div');
-                    scrollbarContainer.style.position = 'fixed';
-                    scrollbarContainer.style.bottom = '0';  // Positioned at the bottom of the screen
-                    scrollbarContainer.style.left = '0';
-                    scrollbarContainer.style.width = '100%';
-                    scrollbarContainer.style.overflowX = 'scroll';
-                    scrollbarContainer.style.height = '20px';  // Height of the scrollbar
-                    scrollbarContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';  // Optional: make it slightly transparent
-                    scrollbarContainer.style.zIndex = '9999';  // Ensure it appears on top of other elements
+                    Object.assign(scrollbarContainer.style, {
+                        position: 'fixed',
+                        bottom: '0',  // Positioned at the bottom of the screen
+                        left: '0',
+                        width: '100%',
+                        overflowX: 'scroll',
+                        height: '20px',  // Height of the scrollbar
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',  // Optional: make it slightly transparent
+                        zIndex: '9999'  // Ensure it appears on top of other elements
+                    });
 
                     // Create a dummy inner element to represent the wide content in the scrollbar container
                     const scrollbarContent = document.createElement('div');

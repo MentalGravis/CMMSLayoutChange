@@ -25,7 +25,7 @@ A szkript a legtöbb modern böngészőre telepíthető.<br>
 </picture><br>
 
 * Képletöltés funkció
-    * Csak a munkalaphoz csatolt mellékletekkel működik, és csak akkor, ha a mezőválasztóban a "Fénykép" oszlop a 3. helyen szerepel (a pipa és a file ikonos oszlop után)
+    * Csak a munkalaphoz csatolt mellékletekkel működik, és csak akkor, ha a mellékletek között a szerepel a Fénykép oszlop (Mezőválasztóval lehet betenni)
         * Igény esetén átalakítom dinamikusra, hogy ne legyen ez megkötés
     * A gomb csak akkor jelenik meg, amikor ez a Mellékletek fül aktív
     * A képeket jpg formátumban menti, a file nevek {Qszám_sorszám.jpg} formátumúak

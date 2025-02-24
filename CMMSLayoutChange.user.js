@@ -50,24 +50,32 @@
             };
 
             // Download an image as JPG with a specific name
-            const downloadImageAsJpg = (url, name) => {
-                fetch(url)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const a = document.createElement('a');
-                        const objectURL = URL.createObjectURL(blob);
-                        a.href = objectURL;
-                        a.download = `${name}.jpg`;
-                        a.click();
-                        URL.revokeObjectURL(objectURL);
-                    })
-                    .catch(error => console.error('Error downloading image:', error));
+            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            const downloadImageAsJpg = async (url, name) => {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                    const blob = await response.blob();
+                    const objectURL = URL.createObjectURL(blob);
+
+                    const a = document.createElement('a');
+                    a.href = objectURL;
+                    a.download = `${name}.jpg`;
+                    document.body.appendChild(a); // Append to the DOM before clicking
+                    a.click();
+                    document.body.removeChild(a); // Remove after click
+
+                    URL.revokeObjectURL(objectURL);
+                    console.log(`Successfully downloaded: ${name}.jpg`);
+                } catch (error) {
+                    console.error(`Error downloading image (${name}):`, error);
+                }
             };
 
-            // Main function to handle downloading images if conditions are met
-            const downloadImagesIfActive = () => {
+            const downloadImagesIfActive = async () => {
                 const igénylésiSzámValue = findIgénylésiSzámValue();
-
                 if (!igénylésiSzámValue) {
                     console.error('Igénylési szám value not found.');
                     return;
@@ -80,26 +88,27 @@
 
                 console.log("Mellékletek is active.");
 
-                // Select images with id containing "Photo_View"
                 const pictureRows = document.querySelectorAll('img[id*="Photo_View"]');
-                if (pictureRows.length <= 1) { // Check if there are enough images to skip the first one
-                    console.warn("No images found or only one image found with 'Photo_View' in their ID.");
+                if (pictureRows.length <= 1) {
+                    console.warn("No images found or only one image found.");
                     return;
                 }
 
-                // Start from the second picture
-                Array.from(pictureRows).slice(1).forEach((img, index) => {
-                    const pictureSrc = img.src;
-                    console.log(`Downloading image ${index + 1}: ${pictureSrc}`); // index + 2 to reflect actual image position
-
-                    // Attempt to download the image, log an error if it fails
-                    try {
-                        downloadImageAsJpg(pictureSrc, `${igénylésiSzámValue}_${index + 1}`);
-                    } catch (error) {
-                        console.error(`Failed to download image ${index + 1}:`, error);
+                for (let i = 1; i < pictureRows.length; i++) { // Start from the second image
+                    const img = pictureRows[i];
+                    if (img.src) {
+                        console.log(`Downloading image ${i}: ${img.src}`);
+                        await downloadImageAsJpg(img.src, `${igénylésiSzámValue}_${i}`);
+                        await delay(300); // Wait 2 seconds before downloading the next image
+                    } else {
+                        console.warn(`Skipping image ${i} (No source URL).`);
                     }
-                });
+                }
+
+                console.log("All images processed.");
             };
+
+
 
             // Run the main download function
             // downloadImagesIfActive();

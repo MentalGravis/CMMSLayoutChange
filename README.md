@@ -6,7 +6,7 @@ A szkript a legtöbb modern böngészőre telepíthető.<br>
     * [Mozilla Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
     * [Google Chrome](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
     * [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
-1. Most már telepítheted a szkriptet. Ehhez [kattints ide](https://github.com/MentalGravis/CMMSLayoutChange/releases/latest/download/CopyTime.user.js).
+1. Most már telepítheted a szkriptet. Ehhez [kattints ide](https://github.com/MentalGravis/CMMSLayoutChange/releases/latest/download/CMMSLayoutChange.user.js).
 1. A megjelenő oldalon kattints az **Install** gombra.
 1. Lépj be a CMMSbe, és használd egészséggel.
 
